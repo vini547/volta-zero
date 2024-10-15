@@ -1,38 +1,36 @@
 import streamlit as st
+import pandas as pd
+import numpy as np
 
-# st.title('Bem vindo')
-# st.header('Bem vindo')
-# st.subheader('Bem vindo')
-# st.markdown("----")
+st.title('Uber pickups in NYC')
 
-# st.markdown("# Isso é um texto com markdown e um [#]")
-# st.markdown("## Isso é um texto com markdown e [##]")
-# st.markdown("### Isso é um texto com markdown e [###]")
+DATE_COLUMN = 'date/time'
+DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
+            'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
 
+@st.cache_data
+def load_data(nrows):
+    data = pd.read_csv(DATA_URL, nrows=nrows)
+    lowercase = lambda x: str(x).lower()
+    data.rename(lowercase, axis='columns', inplace=True)
+    data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
+    return data
 
-st.markdown("----")
+data_load_state = st.text('Loading data...')
+data = load_data(10000)
+data_load_state.text("Done! (using st.cache_data)")
 
-st.markdown("Markdown")
-st.markdown("_Markdown itálico_")
-st.markdown("*Markdown itálico*")
-st.markdown("__Markdown negrito__")
-st.markdown("**Markdown negrito**")
-st.markdown("__*Markdown itálico e negrito*__")
+if st.checkbox('Show raw data'):
+    st.subheader('Raw data')
+    st.write(data)
 
+st.subheader('Number of pickups by hour')
+hist_values = np.histogram(data[DATE_COLUMN].dt.hour, bins=24, range=(0,24))[0]
+st.bar_chart(hist_values)
 
-st.markdown("Isso é um link pro [google](https://google.com.br)")
+# Some number in the range 0-23
+hour_to_filter = st.slider('hour', 0, 23, 17)
+filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
 
-
-st.markdown("<h1 style='text-align: center; color: red;'>Título em vermelho</h1>", unsafe_allow_html=True)
-
-st.markdown('Olá, mundo :sunglasses:')
-st.markdown('Olá, mundo :100:')
-
-
-
-st.markdown('''MARKDOWN | PEQUENO | GRANDE
-                ---     | ---     | ---
-              *iTÁLICO* | `CODE`  | **NEGRITO**
-            ''')
-
-
+st.subheader('Map of all pickups at %s:00' % hour_to_filter)
+st.map(filtered_data)
