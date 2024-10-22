@@ -41,6 +41,7 @@ def all_weakers(heroes_list):
         weakers.append(html_tables2[2].iloc[0:5, 0].tolist())  # Top 5 counters
     return weakers
 
+
 @st.cache_data
 def get_hero_roles(heroes_list):
     hero_attributes = {}
@@ -56,7 +57,17 @@ def get_hero_roles(heroes_list):
         roles = [s.strip() for s in substring.split(',')]
         hero_attributes[hero] = roles
         
-    return pd.DataFrame.from_dict(hero_attributes, orient='index', columns=['Role1', 'Role2', 'Role3', 'Role4', 'Role5', 'Role6'])
+    # Determine the maximum number of roles
+    max_roles = max(len(roles) for roles in hero_attributes.values())
+    
+    # Create a DataFrame and fill missing roles with None
+    roles_df = pd.DataFrame.from_dict(
+        hero_attributes, 
+        orient='index', 
+        columns=[f'Role{i + 1}' for i in range(max_roles)]
+    ).fillna('No Role')  # Optionally fill with a placeholder
+
+    return roles_df
 
 # Fetch hero counters and roles
 if all(hero in heroes for hero in selected_heroes):
