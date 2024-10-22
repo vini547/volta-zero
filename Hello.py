@@ -1,22 +1,38 @@
 import streamlit as st
+import os
+
+# File path for storing user credentials
+CREDENTIALS_FILE = "users.txt"
 
 # User registration and login logic
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 
-if 'users' not in st.session_state:
-    st.session_state.users = {}
+# Function to read users from the credentials file
+def read_users():
+    users = {}
+    if os.path.exists(CREDENTIALS_FILE):
+        with open(CREDENTIALS_FILE, 'r') as file:
+            for line in file:
+                username, password = line.strip().split(',')
+                users[username] = password
+    return users
 
 # Function for user registration
 def register_user(username, password):
-    if username in st.session_state.users:
+    users = read_users()
+    if username in users:
         return "Username already exists."
-    st.session_state.users[username] = password
+    
+    with open(CREDENTIALS_FILE, 'a') as file:
+        file.write(f"{username},{password}\n")
+    
     return "User registered successfully."
 
 # Function for user login
 def login_user(username, password):
-    if username in st.session_state.users and st.session_state.users[username] == password:
+    users = read_users()
+    if username in users and users[username] == password:
         st.session_state.logged_in = True
         return True
     return False
@@ -49,3 +65,4 @@ if st.session_state.logged_in:
     st.title("Welcome to the App!")
     st.write("You are now logged in.")
     # Add content for logged-in users here
+
