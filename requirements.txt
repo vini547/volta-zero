@@ -1,0 +1,6 @@
+
+Copiar código
+pandas
+requests
+streamlit
+lxml
