@@ -46,7 +46,7 @@ def login_user(username, password):
 # Function for logging out
 def logout_user():
     st.session_state.logged_in = False
-    st.experimental_set_query_params(logged_in="false")  # Clear login state
+    st.experimental_set_query_params()  # Clear query parameters to refresh
 
 # Login/Register Page
 if not st.session_state.logged_in:
@@ -60,7 +60,7 @@ if not st.session_state.logged_in:
         if st.button("Login", key="login_button"):
             if login_user(username, password):
                 st.success("Login successful!")
-                st.experimental_set_query_params(logged_in="true")  # Trigger a rerun
+                st.experimental_set_query_params(logged_in="true")  # Force rerun with query params
             else:
                 st.error("Invalid username or password.")
     
@@ -82,4 +82,4 @@ if st.session_state.logged_in:
     # Log Out Button
     if st.button("Log Out", key="logout_button"):
         logout_user()
-        st.experimental_rerun()  # This will rerun the app and take the user back to the login page
+        st.experimental_set_query_params(logged_in="false")  # Reset query params to force rerun
