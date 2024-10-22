@@ -49,7 +49,7 @@ if not st.session_state.logged_in:
         if st.button("Login", key="login_button"):
             if login_user(username, password):
                 st.success("Login successful!")
-                st.experimental_rerun()
+                st.experimental_set_query_params(logged_in="true")  # Trigger a rerun
             else:
                 st.error("Invalid username or password.")
     
@@ -65,4 +65,3 @@ if st.session_state.logged_in:
     st.title("Welcome to the App!")
     st.write("You are now logged in.")
     # Add content for logged-in users here
-
