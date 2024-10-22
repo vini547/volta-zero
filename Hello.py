@@ -1,6 +1,6 @@
 import streamlit as st
 
-# In-memory user storage
+# In-memory user storage for demonstration purposes (you may want to use a database in production)
 users = {}
 
 def register_user(username, password):
@@ -14,20 +14,27 @@ def login_user(username, password):
     """Login the user."""
     return users.get(username) == password
 
-# Streamlit session state for tracking login status
+# Initialize session state
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 
-# Sidebar for navigation
-st.sidebar.title("Navigation")
+# Display Login/Register buttons
 if not st.session_state.logged_in:
-    option = st.sidebar.selectbox("Select an option", ["Login", "Register"])
-else:
-    option = st.sidebar.selectbox("Select a page", ["Home", "Profile", "Settings", "Logout"])
+    st.title("Welcome to the App")
+    
+    # Buttons for Login and Register
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("Login"):
+            st.session_state.page = "login"
+    
+    with col2:
+        if st.button("Register"):
+            st.session_state.page = "register"
 
-# Login page
-if option == "Login":
-    st.title("Login Page")
+# Handle Login and Registration
+if st.session_state.get("page") == "login":
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
     
@@ -38,34 +45,26 @@ if option == "Login":
             st.experimental_rerun()  # Reload the page
         else:
             st.error("Invalid username or password.")
-
-# Registration page
-elif option == "Register":
-    st.title("Registration Page")
+    
+elif st.session_state.get("page") == "register":
     new_username = st.text_input("Choose a username")
     new_password = st.text_input("Choose a password", type="password")
     
     if st.button("Register"):
         if register_user(new_username, new_password):
             st.success("Registration successful! You can now log in.")
+            st.session_state.page = "login"  # Automatically switch back to login
         else:
             st.error("Username already exists. Please choose a different username.")
 
 # Pages available after login
 if st.session_state.logged_in:
-    if option == "Home":
-        st.title("Home Page")
-        st.write("Welcome to the Home Page!")
-    
-    elif option == "Profile":
-        st.title("Profile Page")
-        st.write("This is your Profile Page.")
-    
-    elif option == "Settings":
-        st.title("Settings Page")
-        st.write("Here you can adjust your settings.")
+    st.title("Home Page")
+    st.write("Welcome to the Home Page!")
+    st.write("You can access other pages in the 'pages' folder now.")
 
-    elif option == "Logout":
+    if st.button("Logout"):
         st.session_state.logged_in = False
+        st.session_state.page = None  # Reset the page
         st.success("You have logged out.")
         st.experimental_rerun()  # Reload the page
