@@ -1,5 +1,4 @@
 
-Copiar código
 pandas
 requests
 streamlit
