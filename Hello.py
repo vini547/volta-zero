@@ -37,6 +37,11 @@ def login_user(username, password):
         return True
     return False
 
+# Function for logging out
+def logout_user():
+    st.session_state.logged_in = False
+    st.experimental_set_query_params(logged_in="false")  # Clear login state
+
 # Login/Register Page
 if not st.session_state.logged_in:
     st.title("Login Page")
@@ -64,4 +69,8 @@ if not st.session_state.logged_in:
 if st.session_state.logged_in:
     st.title("Welcome to the App!")
     st.write("You are now logged in.")
-    # Add content for logged-in users here
+    
+    # Log Out Button
+    if st.button("Log Out", key="logout_button"):
+        logout_user()
+        st.experimental_rerun()  # This will rerun the app and take the user back to the login page
