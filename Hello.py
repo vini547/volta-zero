@@ -11,11 +11,14 @@ if 'logged_in' not in st.session_state:
 # Function to read users from the credentials file
 def read_users():
     users = {}
+    # Ensure the file exists before trying to read it
     if os.path.exists(CREDENTIALS_FILE):
         with open(CREDENTIALS_FILE, 'r') as file:
             for line in file:
-                username, password = line.strip().split(',')
-                users[username] = password
+                line = line.strip()
+                if line:  # Skip empty lines
+                    username, password = line.split(',')
+                    users[username] = password
     return users
 
 # Function for user registration
@@ -24,10 +27,13 @@ def register_user(username, password):
     if username in users:
         return "Username already exists."
     
-    with open(CREDENTIALS_FILE, 'a') as file:
-        file.write(f"{username},{password}\n")
-    
-    return "User registered successfully."
+    try:
+        # Open the file in append mode and write the new user's credentials
+        with open(CREDENTIALS_FILE, 'a') as file:
+            file.write(f"{username},{password}\n")
+        return "User registered successfully."
+    except Exception as e:
+        return f"Failed to register user: {e}"
 
 # Function for user login
 def login_user(username, password):
@@ -63,7 +69,10 @@ if not st.session_state.logged_in:
         password = st.text_input("New Password", type="password")
         if st.button("Register", key="register_button"):
             message = register_user(username, password)
-            st.success(message)
+            if "successfully" in message:
+                st.success(message)
+            else:
+                st.error(message)
 
 # Main app content accessible only when logged in
 if st.session_state.logged_in:
