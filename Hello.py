@@ -1,31 +1,47 @@
 import streamlit as st
+# In-memory user storage
+users = {}
 
-def intro():
-    import streamlit as st
+def register_user(username, password):
+    """Register a new user."""
+    if username in users:
+        return False  # User already exists
+    users[username] = password
+    return True
 
-    st.write("# Welcome to Streamlit! 👋")
-    st.sidebar.success("Select a demo above.")
+def login_user(username, password):
+    """Login the user."""
+    return users.get(username) == password
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
+# Sidebar for navigation
+st.sidebar.title("Navigation")
+option = st.sidebar.selectbox("Select an option", ["Login", "Register"])
 
-        **👈 Select a demo from the dropdown on the left** to see some examples
-        of what Streamlit can do!
+# Login page
+if option == "Login":
+    st.title("Login Page")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    
+    if st.button("Login"):
+        if login_user(username, password):
+            st.success("Login successful!")
+            st.write(f"Welcome, {username}!")
+        else:
+            st.error("Invalid username or password.")
 
-        ### Want to learn more?
+# Registration page
+elif option == "Register":
+    st.title("Registration Page")
+    new_username = st.text_input("Choose a username")
+    new_password = st.text_input("Choose a password", type="password")
+    
+    if st.button("Register"):
+        if register_user(new_username, new_password):
+            st.success("Registration successful! You can now log in.")
+        else:
+            st.error("Username already exists. Please choose a different username.")
 
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-
-        ### See more complex demos
-
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
-intro()
+# Optional: Display a logout button
+if st.button("Logout"):
+    st.success("You have logged out.")
