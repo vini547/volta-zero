@@ -3,7 +3,6 @@ import requests as req
 from io import StringIO
 import time as time 
 import streamlit as st
-import pandas as pd
 import altair as alt
 from urllib.error import URLError
 import numpy as np
@@ -11,6 +10,11 @@ import numpy as np
 
 st.markdown("# DOTA 2 Team Builder®")
 # Asking the user to enter 5 heroes through text inputs
+# Function to predict matching heroes based on user input
+def predict_hero(input_text, hero_list):
+    suggestions = [hero for hero in hero_list if hero.lower().startswith(input_text.lower())]
+    return suggestions
+
 st.markdown("### Select 5 heroes:")
 
 selected_heroes = []
@@ -94,38 +98,24 @@ def get_itens_list():
     itens = list(map(lambda hero: (hero.lower().replace(' ','-').replace('(','').replace(')','')), heroes_raw))
     return itens
      
-a = all_counters(selected_heroes) 
-  
+a = all_counters(selected_heroes)   
 b = all_weakers(selected_heroes) 
-
-# Function to predict matching heroes based on user input
-def predict_hero(input_text, hero_list):
-    suggestions = [hero for hero in hero_list if hero.lower().startswith(input_text.lower())]
-    return suggestions
-
-input_text = st.text_input("Type a hero name:")
-if input_text:
-    predictions = predict_hero(input_text, heroes)
-    if predictions:
-        st.write("Did you mean:")
-        for pred in predictions:
-            st.write(f"- {pred}")
-    else:
-        st.write("No matches found.")
         
 lista1 = get_heroes_list()
 lista2 = get_itens_list()
+
 a_df=pd.DataFrame(a[0])
 b_df=pd.DataFrame(b[0])
 
-
-
 a_df = a_df.transpose()
 b_df = b_df.transpose()
+
 a_df.columns=a[1]
 b_df.columns=b[1]
+
 a_df.index=a_df.index+1
 b_df.index=b_df.index+1
+
 st.markdown("## DOTA 2 Team Builder®")
 st.write(a_df)
 st.write(b_df)
