@@ -1,12 +1,13 @@
 import streamlit as st
 import psycopg2
+
 from psycopg2 import sql
 
 # PostgreSQL connection details
-DB_HOST = "your_postgres_host"
-DB_NAME = "your_database_name"
-DB_USER = "your_username"
-DB_PASSWORD = "your_password"
+DB_HOST = "localhost"
+DB_NAME = "userdata"
+DB_USER = "postgres"
+DB_PASSWORD = "ettorebugatti"
 
 # Function to create a connection to PostgreSQL
 def get_connection():
