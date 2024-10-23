@@ -1,83 +1,67 @@
 import streamlit as st
-import psycopg2
+import os
 
-from psycopg2 import sql
+# File path for storing user credentials
+CREDENTIALS_FILE = "users.txt"
 
-# PostgreSQL connection details
-DB_HOST = "localhost"
-DB_NAME = "userdata"
-DB_USER = "postgres"
-DB_PASSWORD = "ettorebugatti"
-
-# Function to create a connection to PostgreSQL
-def get_connection():
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
-    )
-    return conn
-
-# Function to register a new user
-def register_user(username, password):
-    conn = get_connection()
-    cursor = conn.cursor()
-    
-    # Check if username already exists
-    cursor.execute("SELECT username FROM users WHERE username = %s", (username,))
-    if cursor.fetchone():
-        return "Username already exists."
-    
-    # Insert new user into the users table
-    cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return "User registered successfully."
-
-# Function to login a user
-def login_user(username, password):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    # Check if the username and password match
-    cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
-    stored_password = cursor.fetchone()
-    
-    if stored_password and stored_password[0] == password:
-        st.session_state.logged_in = True
-        return True
-    
-    cursor.close()
-    conn.close()
-    return False
-
-# Initializing session state for login
+# User registration and login logic
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
+
+# Function to read users from the credentials file
+def read_users():
+    users = {}
+    if os.path.exists(CREDENTIALS_FILE):
+        with open(CREDENTIALS_FILE, 'r') as file:
+            for line in file:
+                username, password = line.strip().split(',')
+                users[username] = password
+    return users
+
+# Function for user registration
+def register_user(username, password):
+    users = read_users()
+    if username in users:
+        return "Username already exists."
+    
+    with open(CREDENTIALS_FILE, 'a') as file:
+        file.write(f"{username},{password}\n")
+    
+    return "User registered successfully."
+
+# Function for user login
+def login_user(username, password):
+    users = read_users()
+    if username in users and users[username] == password:
+        st.session_state.logged_in = True
+        return True
+    return False
+
+# Function for logging out
+def logout_user():
+    st.session_state.logged_in = False
+    st.experimental_set_query_params(logged_in="false")  # Clear login state
 
 # Login/Register Page
 if not st.session_state.logged_in:
     st.title("Login Page")
-    
+
     menu = st.radio("Choose an option:", ["Login", "Register"])
-    
+
     if menu == "Login":
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        if st.button("Login"):
+        if st.button("Login", key="login_button"):
             if login_user(username, password):
-                st.session_state.logged_in = True
                 st.success("Login successful!")
-                st.experimental_rerun()  # Rerun to refresh the app state
+                st.experimental_set_query_params(logged_in="true")  # Trigger a rerun
             else:
                 st.error("Invalid username or password.")
     
     elif menu == "Register":
         username = st.text_input("New Username")
         password = st.text_input("New Password", type="password")
-        if st.button("Register"):
+        if st.button("Register", key="register_button"):
             message = register_user(username, password)
             st.success(message)
 
@@ -85,6 +69,8 @@ if not st.session_state.logged_in:
 if st.session_state.logged_in:
     st.title("Welcome to the App!")
     st.write("You are now logged in.")
-    if st.button("Logout"):
-        st.session_state.logged_in = False
-        st.experimental_rerun()
+    
+    # Log Out Button
+    if st.button("Log Out", key="logout_button"):
+        logout_user()
+        st.experimental_rerun()  # This will rerun the app and take the user back to the login page
