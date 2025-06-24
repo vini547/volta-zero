@@ -1,6 +1,7 @@
-
+streamlit>=1.25
 pandas
-requests
-streamlit
-lxml
-psycopg2-binary
+matplotlib
+seaborn
+xlsxwriter
+openpyxl
+Pillow
